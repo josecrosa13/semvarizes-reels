@@ -1,0 +1,13 @@
+{
+  "name": "Sem Varizes Reels",
+  "short_name": "SV Reels",
+  "description": "Estúdio de conteúdo com IA — Clínica Dr. José Rosa (Microlaser®)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4efe4",
+  "theme_color": "#2e3a5e",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

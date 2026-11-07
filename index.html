@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e3a5e">
+<title>Sem Varizes Reels</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--navy:#2e3a5e;--navy2:#20304f;--orange:#ec6608;--cream:#f4efe4;--beige:#f3ede2;--taupe:#a98c63;--green:#304a3f;--ink:#243049;--muted:#8a93ad}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#0c1120;display:flex;justify-content:center;min-height:100vh}
+.app{width:100%;max-width:440px;min-height:100vh;background:var(--cream);position:relative;overflow:hidden;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+header .logo{width:40px;height:40px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+header h1{font-size:18px;letter-spacing:.3px}header small{display:block;color:#b9c2db;font-weight:400;font-size:12px;margin-top:1px}
+header .back{margin-left:auto;background:rgba(255,255,255,.12);border:none;color:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;display:none}
+.scr{flex:1;padding:20px;display:none;animation:fade .25s ease}
+.scr.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2{color:var(--navy);font-size:21px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:18px;line-height:1.4}
+.prompt{background:#fff;border:2px solid #e3dccb;border-radius:18px;padding:14px 14px 12px;box-shadow:0 8px 24px rgba(46,58,94,.08)}
+.prompt textarea{width:100%;border:none;outline:none;resize:none;font-size:15px;color:var(--ink);min-height:72px;background:transparent}
+.prompt .row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.mic{width:46px;height:46px;border-radius:50%;background:var(--navy);color:#fff;border:none;font-size:20px;flex:0 0 auto}
+.prompt .hint{color:var(--muted);font-size:12px;flex:1}
+.go{margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700}
+.card{background:#fff;border:2px solid #ece4d3;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:12px;cursor:pointer;transition:.15s}
+.card:active{transform:scale(.98)}.card.sel{border-color:var(--orange);background:#fff7ef}
+.card .ic{width:50px;height:50px;border-radius:13px;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto}
+.card .tx b{display:block;color:var(--navy);font-size:16px}.card .tx span{color:var(--muted);font-size:13px}
+.card .chk{margin-left:auto;width:26px;height:26px;border-radius:50%;border:2px solid #d9d0bd;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+.card.sel .chk{background:var(--orange);border-color:var(--orange)}
+.lane{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--orange);margin:4px 0 10px}
+.cta{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(244,239,228,0),var(--cream) 30%);padding:16px 0 4px;margin-top:8px}
+.btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:700;box-shadow:0 8px 20px rgba(46,58,94,.25)}
+.btn.orange{background:var(--orange)}
+.btn:disabled{opacity:.4}
+.result{background:#fff;border:2px solid #ece4d3;border-radius:16px;padding:14px;margin-bottom:12px}
+.result .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.result .badge{background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+.result .ph{height:150px;border-radius:12px;background:linear-gradient(135deg,#dfe4ef,#eef1f7);display:flex;align-items:center;justify-content:center;color:#9aa3bd;font-size:13px;position:relative;overflow:hidden}
+.result .ph.v{aspect-ratio:9/16;height:auto;max-height:280px;margin:0 auto}
+.result .acts{display:flex;gap:8px;margin-top:10px}
+.result .acts button{flex:1;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700}
+.a-dl{background:var(--beige);color:var(--navy)}.a-pub{background:var(--orange);color:#fff}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{background:#fff;border:2px solid #e3dccb;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--navy)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.foot{color:var(--muted);font-size:11px;text-align:center;padding:14px 20px 22px;line-height:1.5}
+.stepdot{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.stepdot i{width:7px;height:7px;border-radius:50%;background:#d9d0bd}.stepdot i.on{background:var(--orange);width:20px;border-radius:4px}
+.spin{width:54px;height:54px;border:5px solid #e3dccb;border-top-color:var(--orange);border-radius:50%;animation:sp 1s linear infinite;margin:40px auto 18px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="logo">🩺</div>
+ <div><h1>Sem Varizes Reels</h1><small>Estúdio de conteúdo · Microlaser®</small></div>
+ <button class="back" id="back">‹</button>
+</header>
+
+<!-- 1 HOME -->
+<section class="scr on" data-s="home">
+ <h2>O que você precisa hoje?</h2>
+ <p class="sub">Descreva por texto ou por voz. Eu crio o conteúdo e entrego pronto pra postar.</p>
+ <div class="prompt">
+  <textarea id="brief" placeholder="Ex.: Um Reels explicando o tratamento de vasinhos pelo Microlaser, com legenda e chamada pra agendar avaliação."></textarea>
+  <div class="row">
+   <button class="mic" title="Falar">🎙️</button>
+   <div class="hint">Toque no microfone pra ditar</div>
+   <button class="go" onclick="go('tipo')">Começar ›</button>
+  </div>
+ </div>
+ <div class="lane" style="margin-top:22px">ATALHOS</div>
+ <div class="card" onclick="go('tipo')"><div class="ic">⚡</div><div class="tx"><b>Novo conteúdo</b><span>do zero, passo a passo</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('saida')"><div class="ic">📤</div><div class="tx"><b>Só gerar formatos</b><span>já tenho o vídeo</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- 2 TIPO -->
+<section class="scr" data-s="tipo">
+ <div class="stepdot"><i class="on"></i><i></i><i></i><i></i></div>
+ <h2>Tipo de vídeo</h2>
+ <p class="sub">Como você quer produzir o vídeo-base?</p>
+ <div class="card" onclick="pick(this,'tipo','heygen');go('audio')"><div class="ic">🧑‍⚕️</div><div class="tx"><b>Vídeo com meu Avatar</b><span>HeyGen · você falando</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'tipo','ia');go('formato')"><div class="ic">✨</div><div class="tx"><b>Vídeo / Imagem com IA</b><span>Flow · Veo · Claude</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'tipo','meu');go('formato')"><div class="ic">📹</div><div class="tx"><b>Enviar meu vídeo</b><span>gravação da clínica</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- 3 AUDIO (HeyGen) -->
+<section class="scr" data-s="audio">
+ <div class="stepdot"><i></i><i class="on"></i><i></i><i></i></div>
+ <h2>Áudio do avatar</h2>
+ <p class="sub">Qual voz vai narrar o vídeo?</p>
+ <div class="card" onclick="pick(this,'audio','eleven');go('saida')"><div class="ic">🗣️</div><div class="tx"><b>Minha voz clonada</b><span>ElevenLabs · "José Rosa"</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'audio','upload');go('saida')"><div class="ic">⬆️</div><div class="tx"><b>Eu envio o áudio</b><span>gravo e subo o arquivo</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- 4 FORMATO (IA/meu) -->
+<section class="scr" data-s="formato">
+ <div class="stepdot"><i></i><i class="on"></i><i></i><i></i></div>
+ <h2>Formato do conteúdo</h2>
+ <p class="sub">O que a IA vai gerar como base?</p>
+ <div class="card" onclick="pick(this,'formato','imagem');go('saida')"><div class="ic">🖼️</div><div class="tx"><b>Imagem</b><span>via Flow / Claude</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'formato','video');go('saida')"><div class="ic">🎞️</div><div class="tx"><b>Vídeo</b><span>Veo / meu vídeo</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'formato','antesdepois');go('saida')"><div class="ic">🔄</div><div class="tx"><b>Vídeo antes e depois</b><span>resultado do tratamento</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- 5 SAIDA -->
+<section class="scr" data-s="saida">
+ <div class="stepdot"><i></i><i></i><i class="on"></i><i></i></div>
+ <h2>Formatos de saída</h2>
+ <p class="sub">Escolha o que quer gerar (cada um com legenda).</p>
+ <div class="card sel" data-out="reels" onclick="toggle(this)"><div class="ic">📲</div><div class="tx"><b>Reels</b><span>legenda atrás do vídeo</span></div><div class="chk">✓</div></div>
+ <div class="card sel" data-out="story" onclick="toggle(this)"><div class="ic">📖</div><div class="tx"><b>Story</b><span>sequência pra interação</span></div><div class="chk">✓</div></div>
+ <div class="card sel" data-out="carrossel" onclick="toggle(this)"><div class="ic">🖼️</div><div class="tx"><b>Carrossel</b><span>legenda em cima</span></div><div class="chk">✓</div></div>
+ <div class="card" data-out="post" onclick="toggle(this)"><div class="ic">📝</div><div class="tx"><b>Post</b><span>legenda em cima</span></div><div class="chk">✓</div></div>
+ <div class="cta"><button class="btn orange" onclick="go('loading');setTimeout(()=>go('result'),2200)">Gerar conteúdo ›</button></div>
+</section>
+
+<!-- 6 LOADING -->
+<section class="scr" data-s="loading">
+ <div class="spin"></div>
+ <h2 style="text-align:center">Produzindo…</h2>
+ <p class="sub" style="text-align:center">Transcrevendo · enquadrando 9:16 · legenda · som · selo</p>
+</section>
+
+<!-- 7 RESULT -->
+<section class="scr" data-s="result">
+ <div class="stepdot"><i></i><i></i><i></i><i class="on"></i></div>
+ <h2>Pronto! 🎉</h2>
+ <p class="sub">Revise e publique. Tudo dentro das regras do CFM.</p>
+ <div class="result"><div class="top"><span class="badge">REELS</span><b style="color:#2e3a5e;font-size:14px">+ legenda</b></div><div class="ph v">prévia do Reels 9:16</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
+ <div class="result"><div class="top"><span class="badge">CARROSSEL</span><b style="color:#2e3a5e;font-size:14px">+ legenda</b></div><div class="ph">prévia do carrossel 4:5</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
+ <div class="result"><div class="top"><span class="badge">STORY</span><b style="color:#2e3a5e;font-size:14px">sequência</b></div><div class="ph">prévia do Story</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
+ <div class="cta"><button class="btn" onclick="go('home')">Novo conteúdo</button></div>
+</section>
+
+<div class="foot">Sem Varizes Reels · Clínica Dr. José Rosa — Microlaser® · CRM-RO 1330<br>Protótipo navegável (Fase 1). Imagens ilustrativas.</div>
+</div>
+<script>
+var hist=['home'],state={};
+function cur(){return hist[hist.length-1]}
+function show(s){document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.dataset.s===s));document.getElementById('back').style.display=s==='home'?'none':'block';document.querySelector('.app').scrollTo(0,0);window.scrollTo(0,0)}
+function go(s){if(s!==cur())hist.push(s);show(s)}
+document.getElementById('back').onclick=function(){if(hist.length>1){hist.pop();show(cur())}}
+function pick(el,k,v){state[k]=v;el.parentNode.querySelectorAll('.card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
+function toggle(el){el.classList.toggle('sel');el.querySelector('.chk').textContent=el.classList.contains('sel')?'✓':'';}
+</script>
+</body>
+</html>
