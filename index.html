@@ -94,9 +94,15 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
 <section class="scr" data-s="audio">
  <div class="stepdot"><i></i><i class="on"></i><i></i><i></i></div>
  <h2>Áudio do avatar</h2>
- <p class="sub">Qual voz vai narrar o vídeo?</p>
- <div class="card" onclick="pick(this,'audio','eleven');go('saida')"><div class="ic">🗣️</div><div class="tx"><b>Minha voz clonada</b><span>ElevenLabs · "José Rosa"</span></div><div class="chk">›</div></div>
- <div class="card" onclick="pick(this,'audio','upload');go('saida')"><div class="ic">⬆️</div><div class="tx"><b>Eu envio o áudio</b><span>gravo e subo o arquivo</span></div><div class="chk">›</div></div>
+ <p class="sub">Qual voz vai narrar o vídeo? <b style="color:var(--green)">Voz clonada ATIVA ✓</b></p>
+ <div class="card sel" onclick="pick(this,'audio','eleven')"><div class="ic">🗣️</div><div class="tx"><b>Minha voz clonada</b><span>ElevenLabs · "José Rosa"</span></div><button class="chk" style="background:var(--orange);border-color:var(--orange);font-size:14px" onclick="event.stopPropagation();playVoice('intro',this)">▶</button></div>
+ <div class="card" onclick="pick(this,'audio','upload')"><div class="ic">⬆️</div><div class="tx"><b>Eu envio o áudio</b><span>gravo e subo o arquivo</span></div><div class="chk">›</div></div>
+ <div class="lane" style="margin-top:18px">🎧 BANCO DE VOZ · amostras REAIS</div>
+ <div class="card" onclick="playVoice('intro',this.querySelector('.chk'))"><div class="ic">1️⃣</div><div class="tx"><b>Abertura</b><span>"Você sabia que dá pra ver as varizes por dentro…"</span></div><button class="chk" style="background:var(--navy);border-color:var(--navy);font-size:14px">▶</button></div>
+ <div class="card" onclick="playVoice('explica',this.querySelector('.chk'))"><div class="ic">2️⃣</div><div class="tx"><b>Explicação</b><span>"No método Microlaser, a gente trata a veia nutridora…"</span></div><button class="chk" style="background:var(--navy);border-color:var(--navy);font-size:14px">▶</button></div>
+ <div class="card" onclick="playVoice('cta',this.querySelector('.chk'))"><div class="ic">3️⃣</div><div class="tx"><b>Chamada (CTA)</b><span>"Agende a sua avaliação na Clínica Dr. José Rosa."</span></div><button class="chk" style="background:var(--navy);border-color:var(--navy);font-size:14px">▶</button></div>
+ <div class="cta"><button class="btn orange" onclick="go('saida')">Continuar ›</button></div>
+ <audio id="player" preload="none"></audio>
 </section>
 
 <!-- 4 FORMATO (IA/meu) -->
@@ -133,7 +139,7 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="stepdot"><i></i><i></i><i></i><i class="on"></i></div>
  <h2>Pronto! 🎉</h2>
  <p class="sub">Revise e publique. Tudo dentro das regras do CFM.</p>
- <div class="result"><div class="top"><span class="badge">REELS</span><b style="color:#2e3a5e;font-size:14px">+ legenda</b></div><div class="ph v">prévia do Reels 9:16</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
+ <div class="result"><div class="top"><span class="badge">REELS</span><b style="color:#2e3a5e;font-size:14px">+ legenda · REAL</b></div><div class="ph v" style="padding:0;background:#000"><video src="media/reel_demo.mp4" controls playsinline style="width:100%;height:100%;border-radius:12px;object-fit:cover"></video></div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
  <div class="result"><div class="top"><span class="badge">CARROSSEL</span><b style="color:#2e3a5e;font-size:14px">+ legenda</b></div><div class="ph">prévia do carrossel 4:5</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
  <div class="result"><div class="top"><span class="badge">STORY</span><b style="color:#2e3a5e;font-size:14px">sequência</b></div><div class="ph">prévia do Story</div><div class="acts"><button class="a-dl">Baixar</button><button class="a-pub">Publicar</button></div></div>
  <div class="cta"><button class="btn" onclick="go('home')">Novo conteúdo</button></div>
@@ -149,6 +155,18 @@ function go(s){if(s!==cur())hist.push(s);show(s)}
 document.getElementById('back').onclick=function(){if(hist.length>1){hist.pop();show(cur())}}
 function pick(el,k,v){state[k]=v;el.parentNode.querySelectorAll('.card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
 function toggle(el){el.classList.toggle('sel');el.querySelector('.chk').textContent=el.classList.contains('sel')?'✓':'';}
+var _pl=null,_btn=null;
+function playVoice(name,btn){
+ var p=document.getElementById('player');
+ if(_btn&&_btn!==btn)_btn.textContent='▶';
+ if(_pl===name&&!p.paused){p.pause();btn.textContent='▶';return;}
+ p.src='media/voz_'+name+'.mp3';p.play();_pl=name;_btn=btn;btn.textContent='⏸';
+ p.onended=function(){btn.textContent='▶';};
+}
+document.addEventListener('click',function(e){
+ if(e.target.classList.contains('a-dl'))alert('⬇️ Na versão conectada (Fase 2), baixa o arquivo pronto. Esta amostra do Reels já é real — use o player acima.');
+ if(e.target.classList.contains('a-pub'))alert('📲 Publicação direta no Instagram/Facebook entra na Fase 2 (precisa conta Business + App Meta).');
+});
 </script>
 </body>
 </html>
