@@ -116,10 +116,12 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
   </div>
  </div>
  <div id="av_audio" style="display:none">
-  <div style="background:#eef2fa;border-radius:12px;padding:13px;font-size:13px;margin-bottom:10px;color:#2e3a5e">Envie um áudio com a <b>sua voz real</b> (grave um áudio no celular). O avatar vai falar com a sua voz, com a sua entonação.</div>
-  <input type="file" id="avfile" accept="audio/*" style="display:none">
-  <button class="btn" style="margin-bottom:6px" onclick="document.getElementById('avfile').click()">📁 Enviar áudio do celular</button>
+  <div style="background:#eef2fa;border-radius:12px;padding:13px;font-size:13px;margin-bottom:10px;color:#2e3a5e">Grave a <b>sua voz real</b> aqui (com a sua entonação). Toque pra gravar, toque de novo pra parar. O avatar vai falar com a sua voz.</div>
+  <button class="btn" id="recbtn" style="margin-bottom:6px" onclick="toggleRec()">🔴 Gravar minha voz</button>
+  <audio id="recprev" controls style="width:100%;display:none;margin:8px 0"></audio>
   <div id="avaudioname" class="hint" style="text-align:center"></div>
+  <div class="hint" style="text-align:center;margin-top:8px">ou <a onclick="document.getElementById('avfile').click()" style="color:#ec6608;text-decoration:underline">enviar um arquivo de áudio</a></div>
+  <input type="file" id="avfile" accept="audio/*" style="display:none">
  </div>
  <button class="btn orange" style="margin-top:4px" onclick="gerarAvatar()">🎬 Gerar avatar</button>
  <div id="avstatus" class="sub" style="margin-top:12px"></div>
@@ -263,13 +265,34 @@ function dictar(id,btn){
  try{r.start();}catch(e){if(btn)btn.textContent=old;}
 }
 function selFmt(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
-var avMode='texto', avAudioB64=null;
+var avMode='texto', avAudioB64=null, avMime='audio/mpeg';
+var mediaRec=null, recChunks=[];
+function toggleRec(){
+ var btn=document.getElementById('recbtn');
+ if(mediaRec&&mediaRec.state==='recording'){mediaRec.stop();return;}
+ if(!navigator.mediaDevices||!window.MediaRecorder){document.getElementById('avaudioname').textContent='⚠️ gravação não suportada neste navegador';return;}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+  recChunks=[];
+  try{mediaRec=new MediaRecorder(stream);}catch(e){document.getElementById('avaudioname').textContent='⚠️ '+e.message;return;}
+  avMime=mediaRec.mimeType||'audio/mp4';
+  mediaRec.ondataavailable=function(e){if(e.data&&e.data.size>0)recChunks.push(e.data);};
+  mediaRec.onstop=function(){
+   var blob=new Blob(recChunks,{type:avMime});
+   var rd=new FileReader();
+   rd.onload=function(){avAudioB64=String(rd.result).split(',')[1];var a=document.getElementById('recprev');a.src=URL.createObjectURL(blob);a.style.display='block';document.getElementById('avaudioname').textContent='✓ voz gravada ('+Math.round(blob.size/1024)+' KB)';};
+   rd.readAsDataURL(blob);
+   stream.getTracks().forEach(function(t){t.stop();});
+   btn.textContent='🔴 Regravar';
+  };
+  mediaRec.start(); btn.textContent='⏹️ Parar gravação';
+ }).catch(function(){document.getElementById('avaudioname').textContent='⚠️ permita o acesso ao microfone';});
+}
 function selAv(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');avMode=el.getAttribute('data-m');document.getElementById('av_texto').style.display=(avMode==='texto')?'block':'none';document.getElementById('av_audio').style.display=(avMode==='audio')?'block':'none';}
-document.getElementById('avfile').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){avAudioB64=String(r.result).split(',')[1];document.getElementById('avaudioname').textContent='✓ '+f.name;};r.readAsDataURL(f);});
+document.getElementById('avfile').addEventListener('change',function(){var f=this.files[0];if(!f)return;avMime=f.type&&f.type.indexOf('audio')===0?f.type:'audio/mpeg';var r=new FileReader();r.onload=function(){avAudioB64=String(r.result).split(',')[1];document.getElementById('avaudioname').textContent='✓ '+f.name;};r.readAsDataURL(f);});
 function gerarAvatar(){
  var st=document.getElementById('avstatus'); var body;
  if(avMode==='texto'){var t=(document.getElementById('avtext').value||'').trim();if(!t){st.textContent='✍️ Escreva ou fale o texto';return;}body={text:t};}
- else{if(!avAudioB64){st.textContent='🎙️ Envie um áudio primeiro';return;}body={audio_base64:avAudioB64};}
+ else{if(!avAudioB64){st.textContent='🎙️ Grave a sua voz primeiro';return;}body={audio_base64:avAudioB64,mime:avMime};}
  document.getElementById('avwrap').innerHTML='';
  st.textContent='⏳ Enviando pro HeyGen…';
  fetch('https://n8n.semvarizes.org/webhook/gerar-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
