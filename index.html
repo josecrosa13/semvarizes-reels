@@ -71,7 +71,7 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="prompt">
   <textarea id="brief" placeholder="Ex.: Um Reels explicando o tratamento de vasinhos pelo Microlaser, com legenda e chamada pra agendar avaliação."></textarea>
   <div class="row">
-   <button class="mic" title="Falar">🎙️</button>
+   <button class="mic" title="Falar" onclick="dictar('brief',this)">🎙️</button>
    <div class="hint">Toque no microfone pra ditar</div>
    <button class="go" onclick="go('tipo')">Começar ›</button>
   </div>
@@ -111,7 +111,7 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="lane" style="margin-top:18px">✍️ GERAR NA MINHA VOZ · AO VIVO <span style="color:#1a7a3a">● servidor conectado</span></div>
  <div class="prompt" style="margin-bottom:10px">
   <textarea id="vtext" placeholder="Escreva o texto que quer ouvir na sua voz clonada…"></textarea>
-  <div class="row"><div class="hint" id="vstatus">Digite e toque em Gerar</div><button class="go" onclick="gerarVoz()">Gerar voz ›</button></div>
+  <div class="row"><button class="mic" style="width:44px;height:44px;font-size:18px" onclick="dictar('vtext',this)">🎙️</button><div class="hint" id="vstatus">Fale ou digite o texto</div><button class="go" onclick="gerarVoz()">Gerar voz ›</button></div>
  </div>
  <audio id="player2" controls style="width:100%;display:none;margin-bottom:10px"></audio>
  <div class="lane" style="margin-top:18px">🎧 BANCO DE VOZ · amostras REAIS</div>
@@ -136,9 +136,15 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
 <section class="scr" data-s="genimg">
  <h2>Gerar imagem com IA</h2>
  <p class="sub">Descreva a cena. <b style="color:#1a7a3a">● servidor conectado</b></p>
+ <div class="chips" id="imgfmt">
+  <div class="chip on" data-ar="vertical 9:16 (Reels/Story)" onclick="selFmt(this)">Reels 9:16</div>
+  <div class="chip" data-ar="retrato 4:5 (Carrossel)" onclick="selFmt(this)">Carrossel 4:5</div>
+  <div class="chip" data-ar="quadrado 1:1 (Post)" onclick="selFmt(this)">Post 1:1</div>
+  <div class="chip" data-ar="paisagem 16:9" onclick="selFmt(this)">16:9</div>
+ </div>
  <div class="prompt" style="margin-bottom:10px">
   <textarea id="itext" placeholder="Ex.: Pernas femininas saudáveis, mulher de vestido creme ao sol, estética premium, tons bege e verde-petróleo, sem texto"></textarea>
-  <div class="row"><div class="hint" id="istatus">Descreva e toque em Gerar</div><button class="go" onclick="gerarImagem()">Gerar imagem ›</button></div>
+  <div class="row"><button class="mic" style="width:44px;height:44px;font-size:18px" onclick="dictar('itext',this)">🎙️</button><div class="hint" id="istatus">Fale ou escreva o prompt</div><button class="go" onclick="gerarImagem()">Gerar ›</button></div>
  </div>
  <div id="iwrap"></div>
 </section>
@@ -199,12 +205,27 @@ document.getElementById('fileIn').addEventListener('change',function(){
  go('upload');
 });
 var _pl=null,_btn=null;
+function dictar(id,btn){
+ var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert('Seu navegador não suporta ditado. Use o microfone do teclado do celular.');return;}
+ try{var r=new SR();}catch(e){return;}
+ r.lang='pt-BR';r.interimResults=false;r.maxAlternatives=1;
+ var old=btn?btn.textContent:''; if(btn)btn.textContent='🔴';
+ r.onresult=function(e){var t=e.results[0][0].transcript;var el=document.getElementById(id);el.value=(el.value?el.value+' ':'')+t;};
+ r.onend=function(){if(btn)btn.textContent=old;};
+ r.onerror=function(){if(btn)btn.textContent=old;};
+ try{r.start();}catch(e){if(btn)btn.textContent=old;}
+}
+function selFmt(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
 function gerarImagem(){
  var t=(document.getElementById('itext').value||'').trim();
  var st=document.getElementById('istatus');
- if(!t){st.textContent='✍️ Descreva a imagem primeiro';return;}
+ if(!t){st.textContent='✍️ Descreva ou fale o prompt primeiro';return;}
+ var sel=document.querySelector('#imgfmt .chip.on');
+ var ar=sel?sel.getAttribute('data-ar'):'';
+ var prompt=t+(ar?(' Composição no formato '+ar+'.'):'');
  st.textContent='⏳ Gerando imagem… (~15s)';
- fetch('https://n8n.semvarizes.org/webhook/gerar-imagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:t})})
+ fetch('https://n8n.semvarizes.org/webhook/gerar-imagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
   .then(function(b){var u=URL.createObjectURL(b);document.getElementById('iwrap').innerHTML='<img src="'+u+'" style="width:100%;border-radius:14px;margin-top:6px"><a href="'+u+'" download="imagem.png" class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:10px">⬇️ Baixar imagem</a>';st.textContent='✅ Pronto!';})
   .catch(function(e){st.textContent='⚠️ '+e.message;});
