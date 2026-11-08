@@ -87,7 +87,7 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="stepdot"><i class="on"></i><i></i><i></i><i></i></div>
  <h2>Tipo de vídeo</h2>
  <p class="sub">Como você quer produzir o vídeo-base?</p>
- <div class="card" onclick="pick(this,'tipo','heygen');go('audio')"><div class="ic">🧑‍⚕️</div><div class="tx"><b>Vídeo com meu Avatar</b><span>HeyGen · você falando</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'tipo','heygen');go('avatar')"><div class="ic">🧑‍⚕️</div><div class="tx"><b>Vídeo com meu Avatar</b><span>HeyGen · você falando</span></div><div class="chk">›</div></div>
  <div class="card" onclick="pick(this,'tipo','ia');go('formato')"><div class="ic">✨</div><div class="tx"><b>Vídeo / Imagem com IA</b><span>Flow · Veo · Claude</span></div><div class="chk">›</div></div>
  <div class="card" onclick="pick(this,'tipo','meu');document.getElementById('fileIn').click()"><div class="ic">📹</div><div class="tx"><b>Enviar meu vídeo</b><span>gravação da clínica</span></div><div class="chk">›</div></div>
 </section>
@@ -99,6 +99,31 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div id="preview"></div>
  <div style="background:#fff7ef;border:2px solid #ec6608;border-radius:14px;padding:14px;font-size:13.5px;color:#8a5a1a;margin:14px 0;line-height:1.45">⚠️ <b>Arquivo carregado!</b> A <b>geração automática</b> (edição + legenda + voz) é a <b>Fase 2</b> — precisa do servidor conectado. Por enquanto, <b>me envie este arquivo aqui no WhatsApp</b> que eu processo e devolvo pronto. 👊</div>
  <div class="cta"><button class="btn" onclick="go('home')">‹ Voltar ao início</button></div>
+</section>
+
+<!-- AVATAR HeyGen -->
+<section class="scr" data-s="avatar">
+ <h2>Vídeo com seu Avatar</h2>
+ <p class="sub">HeyGen · avatar "José Rosa" <b style="color:#1a7a3a">● conectado</b></p>
+ <div class="chips" id="avmode">
+  <div class="chip on" data-m="texto" onclick="selAv(this)">🗣️ Voz clonada</div>
+  <div class="chip" data-m="audio" onclick="selAv(this)">🎙️ Minha voz real</div>
+ </div>
+ <div id="av_texto">
+  <div class="prompt" style="margin-bottom:10px">
+   <textarea id="avtext" placeholder="Escreva o que o avatar vai falar…"></textarea>
+   <div class="row"><button class="mic" style="width:44px;height:44px;font-size:18px" onclick="dictar('avtext',this)">🎙️</button><div class="hint">Fale ou escreva o texto</div></div>
+  </div>
+ </div>
+ <div id="av_audio" style="display:none">
+  <div style="background:#eef2fa;border-radius:12px;padding:13px;font-size:13px;margin-bottom:10px;color:#2e3a5e">Envie um áudio com a <b>sua voz real</b> (grave um áudio no celular). O avatar vai falar com a sua voz, com a sua entonação.</div>
+  <input type="file" id="avfile" accept="audio/*" style="display:none">
+  <button class="btn" style="margin-bottom:6px" onclick="document.getElementById('avfile').click()">📁 Enviar áudio do celular</button>
+  <div id="avaudioname" class="hint" style="text-align:center"></div>
+ </div>
+ <button class="btn orange" style="margin-top:4px" onclick="gerarAvatar()">🎬 Gerar avatar</button>
+ <div id="avstatus" class="sub" style="margin-top:12px"></div>
+ <div id="avwrap"></div>
 </section>
 
 <!-- 3 AUDIO (HeyGen) -->
@@ -238,6 +263,32 @@ function dictar(id,btn){
  try{r.start();}catch(e){if(btn)btn.textContent=old;}
 }
 function selFmt(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
+var avMode='texto', avAudioB64=null;
+function selAv(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');avMode=el.getAttribute('data-m');document.getElementById('av_texto').style.display=(avMode==='texto')?'block':'none';document.getElementById('av_audio').style.display=(avMode==='audio')?'block':'none';}
+document.getElementById('avfile').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){avAudioB64=String(r.result).split(',')[1];document.getElementById('avaudioname').textContent='✓ '+f.name;};r.readAsDataURL(f);});
+function gerarAvatar(){
+ var st=document.getElementById('avstatus'); var body;
+ if(avMode==='texto'){var t=(document.getElementById('avtext').value||'').trim();if(!t){st.textContent='✍️ Escreva ou fale o texto';return;}body={text:t};}
+ else{if(!avAudioB64){st.textContent='🎙️ Envie um áudio primeiro';return;}body={audio_base64:avAudioB64};}
+ document.getElementById('avwrap').innerHTML='';
+ st.textContent='⏳ Enviando pro HeyGen…';
+ fetch('https://n8n.semvarizes.org/webhook/gerar-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(d){if(!d.video_id)throw new Error('não iniciou');pollAvatar(d.video_id,0);})
+  .catch(function(e){st.textContent='⚠️ '+e.message;});
+}
+function pollAvatar(vid,n){
+ var st=document.getElementById('avstatus');
+ if(n>36){st.textContent='⚠️ demorou demais — tente de novo';return;}
+ st.textContent='🎬 Renderizando seu avatar… (~'+(10+n*10)+'s)';
+ fetch('https://n8n.semvarizes.org/webhook/status-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({video_id:vid})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+   if(d.status==='completed'&&d.video_url){document.getElementById('avwrap').innerHTML='<video src="'+d.video_url+'" controls playsinline style="width:100%;border-radius:14px;margin-top:8px"></video><a href="'+d.video_url+'" target="_blank" class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:10px">⬇️ Abrir / baixar</a>';st.textContent='✅ Pronto! Seu avatar falando.';return;}
+   if(d.status==='failed'||d.status==='error'){st.textContent='⚠️ falhou na renderização';return;}
+   setTimeout(function(){pollAvatar(vid,n+1);},10000);
+  }).catch(function(){setTimeout(function(){pollAvatar(vid,n+1);},10000);});
+}
 function gerarImagem(){
  var t=(document.getElementById('itext').value||'').trim();
  var st=document.getElementById('istatus');
