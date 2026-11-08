@@ -108,6 +108,12 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <p class="sub">Qual voz vai narrar o vídeo? <b style="color:var(--green)">Voz clonada ATIVA ✓</b></p>
  <div class="card sel" onclick="pick(this,'audio','eleven')"><div class="ic">🗣️</div><div class="tx"><b>Minha voz clonada</b><span>ElevenLabs · "José Rosa"</span></div><button class="chk" style="background:var(--orange);border-color:var(--orange);font-size:14px" onclick="event.stopPropagation();playVoice('intro',this)">▶</button></div>
  <div class="card" onclick="pick(this,'audio','upload')"><div class="ic">⬆️</div><div class="tx"><b>Eu envio o áudio</b><span>gravo e subo o arquivo</span></div><div class="chk">›</div></div>
+ <div class="lane" style="margin-top:18px">✍️ GERAR NA MINHA VOZ · AO VIVO <span style="color:#1a7a3a">● servidor conectado</span></div>
+ <div class="prompt" style="margin-bottom:10px">
+  <textarea id="vtext" placeholder="Escreva o texto que quer ouvir na sua voz clonada…"></textarea>
+  <div class="row"><div class="hint" id="vstatus">Digite e toque em Gerar</div><button class="go" onclick="gerarVoz()">Gerar voz ›</button></div>
+ </div>
+ <audio id="player2" controls style="width:100%;display:none;margin-bottom:10px"></audio>
  <div class="lane" style="margin-top:18px">🎧 BANCO DE VOZ · amostras REAIS</div>
  <div class="card" onclick="playVoice('intro',this.querySelector('.chk'))"><div class="ic">1️⃣</div><div class="tx"><b>Abertura</b><span>"Você sabia que dá pra ver as varizes por dentro…"</span></div><button class="chk" style="background:var(--navy);border-color:var(--navy);font-size:14px">▶</button></div>
  <div class="card" onclick="playVoice('explica',this.querySelector('.chk'))"><div class="ic">2️⃣</div><div class="tx"><b>Explicação</b><span>"No método Microlaser, a gente trata a veia nutridora…"</span></div><button class="chk" style="background:var(--navy);border-color:var(--navy);font-size:14px">▶</button></div>
@@ -182,6 +188,16 @@ document.getElementById('fileIn').addEventListener('change',function(){
  go('upload');
 });
 var _pl=null,_btn=null;
+function gerarVoz(){
+ var t=(document.getElementById('vtext').value||'').trim();
+ var st=document.getElementById('vstatus');
+ if(!t){st.textContent='✍️ Escreva um texto primeiro';return;}
+ st.textContent='⏳ Gerando na sua voz…';
+ fetch('https://n8n.semvarizes.org/webhook/gerar-voz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+  .then(function(b){var u=URL.createObjectURL(b);var a=document.getElementById('player2');a.src=u;a.style.display='block';a.play();st.textContent='✅ Pronto! Tocando sua voz';})
+  .catch(function(e){st.textContent='⚠️ '+e.message;});
+}
 function playVoice(name,btn){
  var p=document.getElementById('player');
  if(_btn&&_btn!==btn)_btn.textContent='▶';
