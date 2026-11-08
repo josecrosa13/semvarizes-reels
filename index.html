@@ -62,6 +62,7 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div><h1>Sem Varizes Reels</h1><small>Estúdio de conteúdo · Microlaser®</small></div>
  <button class="back" id="back">‹</button>
 </header>
+<input type="file" id="fileIn" accept="video/*,image/*" style="display:none">
 
 <!-- 1 HOME -->
 <section class="scr on" data-s="home">
@@ -76,8 +77,9 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
   </div>
  </div>
  <div class="lane" style="margin-top:22px">ATALHOS</div>
+ <div class="card" onclick="document.getElementById('fileIn').click()"><div class="ic">📎</div><div class="tx"><b>Subir meu vídeo/foto</b><span>do seu celular, com prévia</span></div><div class="chk">›</div></div>
  <div class="card" onclick="go('tipo')"><div class="ic">⚡</div><div class="tx"><b>Novo conteúdo</b><span>do zero, passo a passo</span></div><div class="chk">›</div></div>
- <div class="card" onclick="go('saida')"><div class="ic">📤</div><div class="tx"><b>Só gerar formatos</b><span>já tenho o vídeo</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('saida')"><div class="ic">📤</div><div class="tx"><b>Ver exemplos reais</b><span>Reels · Carrossel · Story · IA</span></div><div class="chk">›</div></div>
 </section>
 
 <!-- 2 TIPO -->
@@ -87,7 +89,16 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <p class="sub">Como você quer produzir o vídeo-base?</p>
  <div class="card" onclick="pick(this,'tipo','heygen');go('audio')"><div class="ic">🧑‍⚕️</div><div class="tx"><b>Vídeo com meu Avatar</b><span>HeyGen · você falando</span></div><div class="chk">›</div></div>
  <div class="card" onclick="pick(this,'tipo','ia');go('formato')"><div class="ic">✨</div><div class="tx"><b>Vídeo / Imagem com IA</b><span>Flow · Veo · Claude</span></div><div class="chk">›</div></div>
- <div class="card" onclick="pick(this,'tipo','meu');go('formato')"><div class="ic">📹</div><div class="tx"><b>Enviar meu vídeo</b><span>gravação da clínica</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="pick(this,'tipo','meu');document.getElementById('fileIn').click()"><div class="ic">📹</div><div class="tx"><b>Enviar meu vídeo</b><span>gravação da clínica</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- UPLOAD -->
+<section class="scr" data-s="upload">
+ <h2>Seu arquivo</h2>
+ <p class="sub" id="fname">—</p>
+ <div id="preview"></div>
+ <div style="background:#fff7ef;border:2px solid #ec6608;border-radius:14px;padding:14px;font-size:13.5px;color:#8a5a1a;margin:14px 0;line-height:1.45">⚠️ <b>Arquivo carregado!</b> A <b>geração automática</b> (edição + legenda + voz) é a <b>Fase 2</b> — precisa do servidor conectado. Por enquanto, <b>me envie este arquivo aqui no WhatsApp</b> que eu processo e devolvo pronto. 👊</div>
+ <div class="cta"><button class="btn" onclick="go('home')">‹ Voltar ao início</button></div>
 </section>
 
 <!-- 3 AUDIO (HeyGen) -->
@@ -161,6 +172,15 @@ function go(s){if(s!==cur())hist.push(s);show(s)}
 document.getElementById('back').onclick=function(){if(hist.length>1){hist.pop();show(cur())}}
 function pick(el,k,v){state[k]=v;el.parentNode.querySelectorAll('.card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
 function toggle(el){el.classList.toggle('sel');el.querySelector('.chk').textContent=el.classList.contains('sel')?'✓':'';}
+document.getElementById('fileIn').addEventListener('change',function(){
+ var f=this.files[0]; if(!f)return;
+ var url=URL.createObjectURL(f);
+ document.getElementById('preview').innerHTML = f.type.indexOf('video')===0
+   ? '<video src="'+url+'" controls playsinline style="width:100%;border-radius:14px;max-height:460px;background:#000"></video>'
+   : '<img src="'+url+'" style="width:100%;border-radius:14px">';
+ document.getElementById('fname').textContent = f.name+'  ·  '+(Math.round(f.size/1048576*10)/10)+' MB';
+ go('upload');
+});
 var _pl=null,_btn=null;
 function playVoice(name,btn){
  var p=document.getElementById('player');
