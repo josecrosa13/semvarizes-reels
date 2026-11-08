@@ -127,9 +127,20 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="stepdot"><i></i><i class="on"></i><i></i><i></i></div>
  <h2>Formato do conteúdo</h2>
  <p class="sub">O que a IA vai gerar como base?</p>
- <div class="card" onclick="pick(this,'formato','imagem');go('saida')"><div class="ic">🖼️</div><div class="tx"><b>Imagem</b><span>via Flow / Claude</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('genimg')"><div class="ic">🖼️</div><div class="tx"><b>Imagem</b><span>via Flow / Gemini · ao vivo</span></div><div class="chk">›</div></div>
  <div class="card" onclick="pick(this,'formato','video');go('saida')"><div class="ic">🎞️</div><div class="tx"><b>Vídeo</b><span>Veo / meu vídeo</span></div><div class="chk">›</div></div>
  <div class="card" onclick="pick(this,'formato','antesdepois');go('saida')"><div class="ic">🔄</div><div class="tx"><b>Vídeo antes e depois</b><span>resultado do tratamento</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- GERAR IMAGEM IA -->
+<section class="scr" data-s="genimg">
+ <h2>Gerar imagem com IA</h2>
+ <p class="sub">Descreva a cena. <b style="color:#1a7a3a">● servidor conectado</b></p>
+ <div class="prompt" style="margin-bottom:10px">
+  <textarea id="itext" placeholder="Ex.: Pernas femininas saudáveis, mulher de vestido creme ao sol, estética premium, tons bege e verde-petróleo, sem texto"></textarea>
+  <div class="row"><div class="hint" id="istatus">Descreva e toque em Gerar</div><button class="go" onclick="gerarImagem()">Gerar imagem ›</button></div>
+ </div>
+ <div id="iwrap"></div>
 </section>
 
 <!-- 5 SAIDA -->
@@ -188,6 +199,16 @@ document.getElementById('fileIn').addEventListener('change',function(){
  go('upload');
 });
 var _pl=null,_btn=null;
+function gerarImagem(){
+ var t=(document.getElementById('itext').value||'').trim();
+ var st=document.getElementById('istatus');
+ if(!t){st.textContent='✍️ Descreva a imagem primeiro';return;}
+ st.textContent='⏳ Gerando imagem… (~15s)';
+ fetch('https://n8n.semvarizes.org/webhook/gerar-imagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:t})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+  .then(function(b){var u=URL.createObjectURL(b);document.getElementById('iwrap').innerHTML='<img src="'+u+'" style="width:100%;border-radius:14px;margin-top:6px"><a href="'+u+'" download="imagem.png" class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:10px">⬇️ Baixar imagem</a>';st.textContent='✅ Pronto!';})
+  .catch(function(e){st.textContent='⚠️ '+e.message;});
+}
 function gerarVoz(){
  var t=(document.getElementById('vtext').value||'').trim();
  var st=document.getElementById('vstatus');
