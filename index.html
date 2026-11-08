@@ -127,9 +127,30 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="stepdot"><i></i><i class="on"></i><i></i><i></i></div>
  <h2>Formato do conteúdo</h2>
  <p class="sub">O que a IA vai gerar como base?</p>
- <div class="card" onclick="go('genimg')"><div class="ic">🖼️</div><div class="tx"><b>Imagem</b><span>via Flow / Gemini · ao vivo</span></div><div class="chk">›</div></div>
- <div class="card" onclick="pick(this,'formato','video');go('saida')"><div class="ic">🎞️</div><div class="tx"><b>Vídeo</b><span>Veo / meu vídeo</span></div><div class="chk">›</div></div>
- <div class="card" onclick="pick(this,'formato','antesdepois');go('saida')"><div class="ic">🔄</div><div class="tx"><b>Vídeo antes e depois</b><span>resultado do tratamento</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('genimg')"><div class="ic">🖼️</div><div class="tx"><b>Imagem</b><span>Flow / Codex / Claude · ao vivo</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('vwip')"><div class="ic">🎞️</div><div class="tx"><b>Vídeo da biblioteca</b><span>Veo / banco de vídeos</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('vwip')"><div class="ic">🟢</div><div class="tx"><b>Vídeo explicando (fundo verde)</b><span>chroma key · você na tela</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('vwip')"><div class="ic">🔄</div><div class="tx"><b>Vídeo antes e depois</b><span>resultado do tratamento</span></div><div class="chk">›</div></div>
+ <div class="card" onclick="go('edicao')"><div class="ic">🗣️</div><div class="tx"><b>Falar a edição do vídeo</b><span>eu digo como o vídeo deve ficar</span></div><div class="chk">›</div></div>
+</section>
+
+<!-- VIDEO (em construcao) -->
+<section class="scr" data-s="vwip">
+ <h2>Geração de vídeo</h2>
+ <p class="sub">A parte mais pesada da Fase 2.</p>
+ <div style="background:#fff7ef;border:2px solid #ec6608;border-radius:14px;padding:16px;font-size:14px;color:#8a5a1a;line-height:1.5">⚙️ A <b>geração e edição de vídeo</b> (Veo + ffmpeg no servidor) é a próxima etapa que estou construindo. Voz 🎙️ e Imagem 🖼️ já funcionam de verdade.<br><br>Por enquanto: descreva o vídeo em <b>"Falar a edição"</b> ou me <b>envie o vídeo no WhatsApp</b> que eu edito e devolvo pronto. 👊</div>
+ <div class="cta"><button class="btn orange" onclick="go('edicao')">🗣️ Falar a edição ›</button></div>
+</section>
+
+<!-- PROMPT DE EDICAO -->
+<section class="scr" data-s="edicao">
+ <h2>Falar a edição do vídeo</h2>
+ <p class="sub">Diga (por voz ou texto) como o vídeo deve ficar: cortes, legenda, trilha, selo…</p>
+ <div class="prompt" style="margin-bottom:10px">
+  <textarea id="etext" placeholder="Ex.: Reels de 20s, legenda embaixo, trilha calma, selo da clínica no fim, cortes dinâmicos."></textarea>
+  <div class="row"><button class="mic" style="width:44px;height:44px;font-size:18px" onclick="dictar('etext',this)">🎙️</button><div class="hint" id="estatus">Fale ou escreva a edição</div><button class="go" onclick="enviarEdicao()">Enviar ›</button></div>
+ </div>
+ <div id="ewrap"></div>
 </section>
 
 <!-- GERAR IMAGEM IA -->
@@ -225,20 +246,29 @@ function gerarImagem(){
  var ar=sel?sel.getAttribute('data-ar'):'';
  var prompt=t+(ar?(' Composição no formato '+ar+'.'):'');
  st.textContent='⏳ Gerando imagem… (~15s)';
- fetch('https://n8n.semvarizes.org/webhook/gerar-imagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+ var ac=new AbortController();var to=setTimeout(function(){ac.abort();},90000);
+ fetch('https://n8n.semvarizes.org/webhook/gerar-imagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt}),signal:ac.signal})
+  .then(function(r){clearTimeout(to);if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
   .then(function(b){var u=URL.createObjectURL(b);document.getElementById('iwrap').innerHTML='<img src="'+u+'" style="width:100%;border-radius:14px;margin-top:6px"><a href="'+u+'" download="imagem.png" class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:10px">⬇️ Baixar imagem</a>';st.textContent='✅ Pronto!';})
-  .catch(function(e){st.textContent='⚠️ '+e.message;});
+  .catch(function(e){clearTimeout(to);st.textContent='⚠️ '+(e.name==='AbortError'?'demorou demais — tente de novo':e.message);});
+}
+function enviarEdicao(){
+ var t=(document.getElementById('etext').value||'').trim();
+ var st=document.getElementById('estatus');
+ if(!t){st.textContent='✍️ Fale ou escreva a edição primeiro';return;}
+ document.getElementById('ewrap').innerHTML='<div style="background:#eaf6ee;border-left:6px solid #1a7a3a;border-radius:10px;padding:14px;font-size:13.5px;color:#1a5a30;line-height:1.5;margin-top:4px">✅ <b>Briefing salvo!</b> A edição automática de vídeo é a Fase 2 (servidor). Me <b>envie o vídeo no WhatsApp</b> com este pedido que eu edito e devolvo pronto:<br><br>“'+t+'”</div>';
+ st.textContent='Briefing pronto 👇';
 }
 function gerarVoz(){
  var t=(document.getElementById('vtext').value||'').trim();
  var st=document.getElementById('vstatus');
  if(!t){st.textContent='✍️ Escreva um texto primeiro';return;}
  st.textContent='⏳ Gerando na sua voz…';
- fetch('https://n8n.semvarizes.org/webhook/gerar-voz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+ var ac2=new AbortController();var to2=setTimeout(function(){ac2.abort();},60000);
+ fetch('https://n8n.semvarizes.org/webhook/gerar-voz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t}),signal:ac2.signal})
+  .then(function(r){clearTimeout(to2);if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
   .then(function(b){var u=URL.createObjectURL(b);var a=document.getElementById('player2');a.src=u;a.style.display='block';a.play();st.textContent='✅ Pronto! Tocando sua voz';})
-  .catch(function(e){st.textContent='⚠️ '+e.message;});
+  .catch(function(e){clearTimeout(to2);st.textContent='⚠️ '+(e.name==='AbortError'?'demorou demais — tente de novo':e.message);});
 }
 function playVoice(name,btn){
  var p=document.getElementById('player');
