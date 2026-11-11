@@ -97,7 +97,14 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <h2>Seu arquivo</h2>
  <p class="sub" id="fname">—</p>
  <div id="preview"></div>
- <div style="background:#fff7ef;border:2px solid #ec6608;border-radius:14px;padding:14px;font-size:13.5px;color:#8a5a1a;margin:14px 0;line-height:1.45">⚠️ <b>Arquivo carregado!</b> A <b>geração automática</b> (edição + legenda + voz) é a <b>Fase 2</b> — precisa do servidor conectado. Por enquanto, <b>me envie este arquivo aqui no WhatsApp</b> que eu processo e devolvo pronto. 👊</div>
+ <div class="lane" style="margin-top:18px">O QUE VOCÊ QUER NESSE VÍDEO?</div>
+ <div class="card sel" data-ed="Reels 9:16 vertical" onclick="toggle(this)"><div class="ic">📲</div><div class="tx"><b>Reels 9:16</b><span>formato vertical</span></div><div class="chk">✓</div></div>
+ <div class="card sel" data-ed="legenda automática" onclick="toggle(this)"><div class="ic">📝</div><div class="tx"><b>Legenda automática</b><span>transcreve e queima na tela</span></div><div class="chk">✓</div></div>
+ <div class="card" data-ed="cortes dos trechos fracos" onclick="toggle(this)"><div class="ic">✂️</div><div class="tx"><b>Cortar partes fracas</b><span>deixa dinâmico</span></div><div class="chk"></div></div>
+ <div class="card" data-ed="b-roll de apoio" onclick="toggle(this)"><div class="ic">🎞️</div><div class="tx"><b>B-roll de apoio</b><span>cenas ilustrativas</span></div><div class="chk"></div></div>
+ <div class="card" data-ed="selo da clínica no fim" onclick="toggle(this)"><div class="ic">🏥</div><div class="tx"><b>Selo da clínica</b><span>CRM + marca no fim</span></div><div class="chk"></div></div>
+ <button class="btn orange" style="margin-top:12px" onclick="enviarEdicaoVideo()">Enviar pro Squad de Edição ›</button>
+ <div id="edbrief"></div>
  <div class="cta"><button class="btn" onclick="go('home')">‹ Voltar ao início</button></div>
 </section>
 
@@ -244,6 +251,15 @@ function go(s){if(s!==cur())hist.push(s);show(s)}
 document.getElementById('back').onclick=function(){if(hist.length>1){hist.pop();show(cur())}}
 function pick(el,k,v){state[k]=v;el.parentNode.querySelectorAll('.card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
 function toggle(el){el.classList.toggle('sel');el.querySelector('.chk').textContent=el.classList.contains('sel')?'✓':'';}
+var _edbrief='';
+function enviarEdicaoVideo(){
+ var sels=[];document.querySelectorAll('section[data-s="upload"] .card.sel').forEach(function(c){sels.push(c.getAttribute('data-ed'));});
+ if(!sels.length){document.getElementById('edbrief').innerHTML='<div class="hint" style="color:#b4500a;margin-top:10px">Escolha pelo menos uma opção acima.</div>';return;}
+ var fn=(document.getElementById('fname').textContent||'meu vídeo').split('·')[0].trim();
+ _edbrief='Edita o vídeo "'+fn+'": '+sels.join(', ')+'. Tudo dentro do CFM.';
+ document.getElementById('edbrief').innerHTML='<div style="background:#eaf6ee;border-left:6px solid #1a7a3a;border-radius:10px;padding:14px;font-size:13px;color:#1a5a30;line-height:1.5;margin-top:10px">✅ <b>Pedido montado!</b><br>Agora me <b>envie o vídeo aqui no WhatsApp</b> com este pedido:<br><br>“'+_edbrief+'”<br><br><button class="btn" onclick="copiarBrief(this)">📋 Copiar pedido</button></div>';
+}
+function copiarBrief(b){try{if(navigator.clipboard)navigator.clipboard.writeText(_edbrief);}catch(e){}if(b)b.textContent='✓ Copiado';}
 document.getElementById('fileIn').addEventListener('change',function(){
  var f=this.files[0]; if(!f)return;
  var url=URL.createObjectURL(f);
