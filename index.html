@@ -53,6 +53,11 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
 .stepdot i{width:7px;height:7px;border-radius:50%;background:#d9d0bd}.stepdot i.on{background:var(--orange);width:20px;border-radius:4px}
 .spin{width:54px;height:54px;border:5px solid #e3dccb;border-top-color:var(--orange);border-radius:50%;animation:sp 1s linear infinite;margin:40px auto 18px}
 @keyframes sp{to{transform:rotate(360deg)}}
+.avp{flex:0 0 auto;width:84px;text-align:center;cursor:pointer}
+.avp img{width:84px;height:84px;object-fit:cover;border-radius:12px;border:3px solid transparent;background:#e3dccb}
+.avp.on img{border-color:var(--orange)}
+.avp span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.2}
+.avp.on span{color:var(--navy);font-weight:700}
 </style>
 </head>
 <body>
@@ -120,6 +125,14 @@ h2{color:var(--navy);font-size:21px;margin-bottom:4px}
  <div class="chips" id="avmode">
   <div class="chip on" data-m="texto" onclick="selAv(this)">🗣️ Voz clonada</div>
   <div class="chip" data-m="audio" onclick="selAv(this)">🎙️ Minha voz real</div>
+ </div>
+ <div class="lane" style="margin-top:4px">ESCOLHA O AVATAR</div>
+ <div id="avpick" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px">
+  <div class="avp on" data-id="8f19cf55c2ac43078e10f1a5d8baf3d5" onclick="selAvatarPic(this)"><img src="media/avatars/1.jpg"><span>Terno · sentado</span></div>
+  <div class="avp" data-id="7ce7bad7b7be4e27a603ec0af564599f" onclick="selAvatarPic(this)"><img src="media/avatars/2.jpg"><span>Terno · em pé</span></div>
+  <div class="avp" data-id="8f3ad1b0d9804f599d1ae90048f11133" onclick="selAvatarPic(this)"><img src="media/avatars/3.jpg"><span>Cirúrgico</span></div>
+  <div class="avp" data-id="dfe53cb2c5a249a9b004efe3acaca0d5" onclick="selAvatarPic(this)"><img src="media/avatars/4.jpg"><span>Jaleco</span></div>
+  <div class="avp" data-id="c1419a097ba746c38d2093d0b0de8405" onclick="selAvatarPic(this)"><img src="media/avatars/5.jpg"><span>Jaleco 2</span></div>
  </div>
  <div id="av_texto">
   <div class="prompt" style="margin-bottom:10px">
@@ -330,11 +343,14 @@ function toggleRec(){
  }).catch(function(){document.getElementById('avaudioname').textContent='⚠️ permita o acesso ao microfone';});
 }
 function selAv(el){el.parentNode.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});el.classList.add('on');avMode=el.getAttribute('data-m');document.getElementById('av_texto').style.display=(avMode==='texto')?'block':'none';document.getElementById('av_audio').style.display=(avMode==='audio')?'block':'none';}
+var avId='8f19cf55c2ac43078e10f1a5d8baf3d5';
+function selAvatarPic(el){document.querySelectorAll('#avpick .avp').forEach(function(c){c.classList.remove('on');});el.classList.add('on');avId=el.getAttribute('data-id');}
 document.getElementById('avfile').addEventListener('change',function(){var f=this.files[0];if(!f)return;document.getElementById('avaudioname').textContent='⏳ preparando áudio…';blobToWav(f,function(b64,err){if(!b64){document.getElementById('avaudioname').textContent='⚠️ não consegui ler esse áudio';return;}avAudioB64=b64;avMime='audio/x-wav';document.getElementById('avaudioname').textContent='✓ '+f.name;});});
 function gerarAvatar(){
  var st=document.getElementById('avstatus'); var body;
  if(avMode==='texto'){var t=(document.getElementById('avtext').value||'').trim();if(!t){st.textContent='✍️ Escreva ou fale o texto';return;}body={text:t};}
  else{if(!avAudioB64){st.textContent='🎙️ Grave a sua voz primeiro';return;}body={audio_base64:avAudioB64,mime:avMime};}
+ body.avatar_id=avId;
  document.getElementById('avwrap').innerHTML='';
  st.textContent='⏳ Enviando pro HeyGen…';
  fetch('https://n8n.semvarizes.org/webhook/gerar-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
